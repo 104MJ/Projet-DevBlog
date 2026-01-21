@@ -1,23 +1,18 @@
 from flask import Flask, jsonify
-import os
-import psycopg2
+from flask_cors import CORS
 
 app = Flask(__name__)
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Option A : La plus sûre pour le développement (autorise tout temporairement)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-@app.route("/")
-def home():
-    return jsonify({"message": "DevBlog backend is running "})
+# Option B : Plus précise (si tu préfères rester sur blog.localhost)
+# CORS(app, origins=["http://blog.localhost"])
 
-@app.route("/health")
-def health():
-    try:
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.close()
-        return jsonify({"db": "connected"})
-    except Exception as e:
-        return jsonify({"db": "error", "details": str(e)}), 500
+@app.route('/ping') # Vérifie que c'est bien /ping et non /
+def ping():
+    return jsonify({"status": "success", "message": "Pong!"})
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+if __name__ == '__main__':
+    # host='0.0.0.0' est INDISPENSABLE pour Docker
+    app.run(host='0.0.0.0', port=8000)
