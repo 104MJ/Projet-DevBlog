@@ -1,46 +1,29 @@
 services:
-  frontend:
-    build: ../frontend
-    container_name: frontend
-    expose:
-      - "5173"
+  cloudflared:
+    image: cloudflare/cloudflared:2026.1.1
+    # command: tunnel --url http://caddy
+    # command: tunnel --url run //attention ca c'est pour la prod
+    command: tunnel --url http://caddy-public:80
+    container_name: cloudflared
+    user: "1001:1001"
+    environment:
+      - PUID=1001
+      - PGID=1001
+      - TZ=Europe/Paris
+    # on a ajouté ca
     networks:
       - public
-
-  backend:
-    build: ../backend
-    container_name: backend
-    expose:
-      - "8000"
-    env_file:
-      - ../.env
-    depends_on:
-      - db
-    networks:
-      - public
-
-  db:
-    image: postgres:15-alpine
-    container_name: db
-    env_file:
-      - ../.env
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    networks:
-      - public
+    restart: unless-stopped
 
   caddy:
     image: caddy:2.10
-    container_name: caddy
+    container_name: caddy-public
     ports:
       - "80:80"
     volumes:
-      - ./config/caddy/Caddyfile:/etc/caddy/Caddyfile
-      - ./data/caddy/data:/data
-      - ./data/caddy/config:/config
-    depends_on:
-      - frontend
-      - backend
+      - ./config/caddy-public/Caddyfile:/etc/caddy/Caddyfile
+      - ./data/caddy-public/data:/data
+      - ./data/caddy-public/config:/config
     networks:
       - public
     restart: unless-stopped
@@ -50,4 +33,4 @@ volumes:
 
 networks:
   public:
-    driver: bridge
+    external: true

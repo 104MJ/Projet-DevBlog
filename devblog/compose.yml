@@ -1,19 +1,15 @@
 services:
   frontend:
     build: ./frontend
-    ports:
-      - "${FRONTEND_PORT}"
     env_file:
-      - .env
+      - ../.env
     networks:
       - public
 
   backend:
     build: ./backend
-    ports:
-      - "${BACKEND_PORT}"
     env_file:
-      - .env
+      - ../.env
     depends_on:
       - db
     networks:
@@ -22,9 +18,11 @@ services:
   db:
     image: postgres:15-alpine
     env_file:
-      - .env
+      - ../.env
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - public
 
 volumes:
   db_data:
