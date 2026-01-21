@@ -1,0 +1,7 @@
+http://blog.localhost {
+    reverse_proxy frontend:5173
+}
+
+http://api.blog.localhost {
+    reverse_proxy backend:8000
+}
