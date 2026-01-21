@@ -10,7 +10,6 @@ services:
       - PUID=1001
       - PGID=1001
       - TZ=Europe/Paris
-    # on a ajouté ca
     networks:
       - public
     restart: unless-stopped
@@ -28,9 +27,43 @@ services:
       - public
     restart: unless-stopped
 
-volumes:
-  db_data:
+  caddy-private:
+    image: caddy:2.10
+    container_name: caddy-private
+    ports:
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./config/caddy-private/Caddyfile:/etc/caddy/Caddyfile
+      - ./data/caddy-private/data:/data
+      - ./data/caddy-private/config:/config
+    networks:
+      - private
+    restart: unless-stopped
+
+  dockge:
+    image: louislam/dockge:1
+    container_name: dockge
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/dockge:/app/data
+      - ../:/app/stacks
+    environment:
+      - DOCKGE_STACKS_DIR=/app/stacks
+      - DOCKGE_BASE_URL=/dockge
+    networks:
+      - private
 
 networks:
   public:
+    name: public
+    external: true
+  private:
+    name: private
+    external: true
+  internet:
+    name: internet
     external: true
