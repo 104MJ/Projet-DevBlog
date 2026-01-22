@@ -2,17 +2,44 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>DevBlog</title>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevBlog | Partage & Tech</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <nav>
-      <h1>DevBlog</h1>
-      <a href="/#/">Accueil</a>
-      <a href="/#/articles">Articles</a>
-      <a href="/#/tutos">Tutos</a>
+      <div class="nav-logo">
+        <h1>DevBlog</h1>
+      </div>
+      <div class="nav-links">
+        <a href="#/">Accueil</a>
+        <a href="#/articles">Articles</a>
+        <a href="#/tutos">Tutos</a>
+      </div>
     </nav>
-    <main id="app"></main>
+
+    <main id="app">
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 50vh;
+        "
+      >
+        <p style="opacity: 0.5">Chargement de l'univers...</p>
+      </div>
+    </main>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
