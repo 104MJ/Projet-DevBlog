@@ -17,7 +17,18 @@ def get_db():
         **DB
     )
 
-@app.before_first_request
+if hasattr(app, "before_first_request"):
+    _db_decorator = app.before_first_request
+elif hasattr(app, "before_serving"):
+    _db_decorator = app.before_serving
+else:
+    def _db_decorator(f):
+        # fallback: run immediately at import time (best-effort)
+        f()
+        return f
+
+
+@_db_decorator
 def init_db():
     conn = get_db(); cur = conn.cursor()
     cur.execute("""
