@@ -11,7 +11,7 @@ export async function Home() {
         <p style="font-size: 1.2rem; opacity: 0.8;">L'espace dédié aux passionnés de code et d'infrastructure.</p>
         <div style="margin-top: 2.5rem;">
           <a href="#/articles" class="btn">🚀 Lire les Articles</a>
-          <a href="#/tutos" class="btn" style="background:transparent; border: 2px solid var(--primary); color: var(--primary);"> Voir les Tutos</a>
+          <a href="#/tutos" class="btn" style="background:transparent; border: 2px solid var(--primary); color: var(--primary);"> 📹  Voir les Tutos</a>
         </div>
       </div>
     </section>
