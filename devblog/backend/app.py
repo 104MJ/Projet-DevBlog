@@ -17,91 +17,97 @@ DB_CONFIG = {
 }
 
 def get_db():
-    """Crée une connexion à la base de données avec retry si elle n'est pas prête."""
     retries = 5
     while retries > 0:
         try:
             return psycopg2.connect(**DB_CONFIG)
         except psycopg2.OperationalError:
             retries -= 1
-            print(f"La DB n'est pas prête... tentative restante: {retries}")
             time.sleep(2)
-    raise Exception("Impossible de se connecter à la base de données")
+    raise Exception("Impossible de se connecter à la DB")
 
 def init_db():
-    """Initialisation de la table au démarrage."""
+    """Initialisation des deux tables séparées."""
     try:
         conn = get_db()
         cur = conn.cursor()
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS posts (
+            CREATE TABLE IF NOT EXISTS articles (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 content TEXT NOT NULL,
-                type TEXT CHECK (type IN ('article','tuto')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS tutos (
+                id SERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                video_url TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         conn.commit()
         cur.close()
         conn.close()
-        print("Base de données initialisée avec succès.")
+        print("Tables initialisées.")
     except Exception as e:
-        print(f"Erreur d'initialisation: {e}")
+        print(f"Erreur init: {e}")
 
 init_db()
 
-@app.get("/api/ping") 
-def ping():
-    return jsonify({"status": "ok", "message": "Backend Flask est en ligne"}), 200
-
 @app.get("/posts")
 def list_posts():
-    post_type = request.args.get("type")
+    post_type = request.args.get("type") 
     limit = request.args.get("limit")
+    
+    table = "articles" if post_type == "article" else "tutos"
     
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-
-    query = "SELECT id, title, type, created_at FROM posts"
-    params = []
-
-    if post_type:
-        query += " WHERE type=%s"
-        params.append(post_type)
     
+    if post_type == "tuto":
+        query = f"SELECT id, title, content, video_url, created_at FROM {table}"
+    else:
+        query = f"SELECT id, title, content, created_at FROM {table}"
+
     query += " ORDER BY created_at DESC"
     
     if limit:
-        query += " LIMIT %s"
-        params.append(limit)
+        query += f" LIMIT {int(limit)}"
 
-    cur.execute(query, params)
+    cur.execute(query)
     rows = cur.fetchall()
-    cur.close()
-    conn.close()
-
+    cur.close(); conn.close()
     return jsonify(rows)
 
 @app.post("/posts")
 def create_post():
     data = request.json
-    if not data or not all(k in data for k in ("title", "content", "type")):
-        return jsonify({"error": "Données manquantes"}), 400
-
+    post_type = data.get("type") 
+    
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute(
-        "INSERT INTO posts (title, content, type) VALUES (%s, %s, %s) RETURNING id, created_at",
-        (data["title"], data["content"], data["type"])
-    )
-    new_post = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-    
-    return jsonify({"status": "created", "id": new_post['id']}), 201
 
+    if post_type == "article":
+        cur.execute(
+            "INSERT INTO articles (title, content) VALUES (%s, %s) RETURNING id",
+            (data["title"], data["content"])
+        )
+    elif post_type == "tuto":
+        cur.execute(
+            "INSERT INTO tutos (title, content, video_url) VALUES (%s, %s, %s) RETURNING id",
+            (data["title"], data["content"], data.get("video_url"))
+        )
+    else:
+        return jsonify({"error": "Type invalide"}), 400
+
+    new_id = cur.fetchone()['id']
+    conn.commit()
+    cur.close(); conn.close()
+    
+    return jsonify({"status": "created", "id": new_id}), 201
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)

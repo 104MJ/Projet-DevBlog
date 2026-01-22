@@ -232,3 +232,13 @@ nav a {
   border-radius: 12px;
   font-style: italic;
 }
+
+/* Accentuation pour les Tutos */
+#tutos-page .tag {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+#tutos-page .card:hover {
+  border-color: #ef4444;
+}

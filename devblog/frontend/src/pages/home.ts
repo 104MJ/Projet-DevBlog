@@ -18,20 +18,20 @@ export async function Home() {
 
     <div class="grid">
       <div class="section-container">
-        <h2 style="display: flex; align-items: center; gap: 10px;">
-          <span class="tag">Derniers Articles</span>
+        <h2 style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+          <span class="tag" style="background: rgba(56, 189, 248, 0.1);">📝 Derniers Articles</span>
         </h2>
-        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
           ${
             articles.length > 0
               ? articles
                   .map(
                     (a: any) => `
-            <a href="#/posts/${a.id}" class="post-link">
+            <a href="#/posts/${a.id}" class="card-link">
               <div class="card">
-                <h3>${a.title}</h3>
-                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                  <small style="color: var(--primary);">Lire l'article →</small>
+                <h3 style="margin:0; font-size: 1.1rem;">${a.title}</h3>
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                  <small style="color: var(--primary); font-weight: bold;">Lire la suite →</small>
                   <small style="opacity: 0.5;">${new Date(a.created_at).toLocaleDateString()}</small>
                 </div>
               </div>
@@ -39,26 +39,26 @@ export async function Home() {
           `,
                   )
                   .join("")
-              : `<p style="opacity:0.5;">Aucun article pour le moment.</p>`
+              : `<p style="opacity:0.5; text-align:center;">Aucun article publié.</p>`
           }
         </div>
       </div>
 
       <div class="section-container">
-        <h2 style="display: flex; align-items: center; gap: 10px;">
-          <span class="tag">Derniers Tutos</span>
+        <h2 style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+          <span class="tag" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">🎬 Dernières Vidéos</span>
         </h2>
-        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
           ${
             tutos.length > 0
               ? tutos
                   .map(
                     (t: any) => `
-            <a href="#/posts/${t.id}" class="post-link">
-              <div class="card">
-                <h3>${t.title}</h3>
-                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                  <small style="color: var(--primary);">Voir le tuto →</small>
+            <a href="${t.video_url}" target="_blank" class="card-link">
+              <div class="card" style="border-left: 4px solid #ef4444;">
+                <h3 style="margin:0; font-size: 1.1rem;">${t.title}</h3>
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                  <small style="color: #ef4444; font-weight: bold;">Regarder sur YouTube ▶</small>
                   <small style="opacity: 0.5;">${new Date(t.created_at).toLocaleDateString()}</small>
                 </div>
               </div>
@@ -66,7 +66,7 @@ export async function Home() {
           `,
                   )
                   .join("")
-              : `<p style="opacity:0.5;">Aucun tuto pour le moment.</p>`
+              : `<p style="opacity:0.5; text-align:center;">Aucun tutoriel disponible.</p>`
           }
         </div>
       </div>

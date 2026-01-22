@@ -5,14 +5,19 @@
 const API = "/api/posts";
 
 export const api = {
-  list: (type?: string, limit?: number) => {
+  list: (type: "article" | "tuto", limit?: number) => {
     const url = new URL(window.location.origin + API);
-    if (type) url.searchParams.append("type", type);
+    url.searchParams.append("type", type);
     if (limit) url.searchParams.append("limit", limit.toString());
     return fetch(url).then((r) => r.json());
   },
 
-  create: (data: any) =>
+  create: (data: {
+    title: string;
+    content: string;
+    type: string;
+    video_url?: string;
+  }) =>
     fetch(API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

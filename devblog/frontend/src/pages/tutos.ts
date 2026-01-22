@@ -13,9 +13,12 @@ export async function ListTutos() {
       const content = (
         document.getElementById("content") as HTMLTextAreaElement
       ).value;
+      const video_url = (
+        document.getElementById("video_url") as HTMLInputElement
+      ).value;
 
       try {
-        await api.create({ title, content, type });
+        await api.create({ title, content, type, video_url });
         form.innerHTML =
           "<h3 style='color: #4ade80; text-align:center;'>🎓 Tutoriel ajouté à la base !</h3>";
         setTimeout(() => window.location.reload(), 1000);
@@ -34,8 +37,9 @@ export async function ListTutos() {
 
       <form id="post-form" class="modern-form">
         <h3>🛠️ Créer un guide pratique</h3>
-        <input type="text" id="title" placeholder="Quel sujet allez-vous enseigner ?" required />
-        <textarea id="content" placeholder="Détaillez les étapes de votre tutoriel ici..." rows="6" required></textarea>
+        <input type="text" id="title" placeholder="Titre du tutoriel" required />
+        <input type="url" id="video_url" placeholder="Lien YouTube (https://...)" required /> 
+        <textarea id="content" placeholder="Description courte..." rows="4" required></textarea>
         <button type="submit" class="btn-publish">Partager le tutoriel</button>
       </form>
 
@@ -47,14 +51,14 @@ export async function ListTutos() {
               ? posts
                   .map(
                     (p: any) => `
-            <a href="#/posts/${p.id}" class="card-link">
+            <a href="${p.video_url}" class="card-link" target="_blank" rel="noopener">
               <div class="card">
                 <div class="card-header">
                    <h3>${p.title}</h3>
                    <span class="tag">Tuto • ${new Date(p.created_at).toLocaleDateString()}</span>
                 </div>
                 <p class="post-excerpt">${p.content || "Suivre ce guide..."}</p>
-                <div class="card-footer">Lancer le tutoriel <span>→</span></div>
+                <div class="card-footer">Voir la vidéo <span>▶️</span></div>
               </div>
             </a>
           `,
