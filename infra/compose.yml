@@ -21,8 +21,7 @@ services:
       - "80:80"
     volumes:
       - ./config/caddy-public/Caddyfile:/etc/caddy/Caddyfile
-      - ./data/caddy-public/data:/data
-      - ./data/caddy-public/config:/config
+
     networks:
       - public
     restart: unless-stopped
@@ -35,8 +34,7 @@ services:
       - "443:443/udp"
     volumes:
       - ./config/caddy-private/Caddyfile:/etc/caddy/Caddyfile
-      - ./data/caddy-private/data:/data
-      - ./data/caddy-private/config:/config
+
     networks:
       - private
     restart: unless-stopped
