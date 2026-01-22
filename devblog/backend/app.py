@@ -1,97 +1,107 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import psycopg2
+from psycopg2.extras import RealDictCursor 
+import time
 import os
 
 app = Flask(__name__)
 CORS(app)
 
-DB = dict(
-host=os.getenv("POSTGRES_HOST", "db"),
-dbname=os.getenv("POSTGRES_DB", "devblog"),
-user=os.getenv("POSTGRES_USER", "devblog"),
-password=os.getenv("POSTGRES_PASSWORD", "devblog")
-)
+DB_CONFIG = {
+    "host": os.getenv("POSTGRES_HOST", "db"),
+    "dbname": os.getenv("POSTGRES_DB", "devblog"),
+    "user": os.getenv("POSTGRES_USER", "devblog"),
+    "password": os.getenv("POSTGRES_PASSWORD", "devblog"),
+    "port": os.getenv("POSTGRES_PORT", "5432")
+}
+
 def get_db():
-    return psycopg2.connect(
-        **DB
-    )
+    """Crée une connexion à la base de données avec retry si elle n'est pas prête."""
+    retries = 5
+    while retries > 0:
+        try:
+            return psycopg2.connect(**DB_CONFIG)
+        except psycopg2.OperationalError:
+            retries -= 1
+            print(f"La DB n'est pas prête... tentative restante: {retries}")
+            time.sleep(2)
+    raise Exception("Impossible de se connecter à la base de données")
 
-if hasattr(app, "before_first_request"):
-    _db_decorator = app.before_first_request
-elif hasattr(app, "before_serving"):
-    _db_decorator = app.before_serving
-else:
-    def _db_decorator(f):
-        # fallback: run immediately at import time (best-effort)
-        f()
-        return f
-
-
-@_db_decorator
 def init_db():
-    conn = get_db(); cur = conn.cursor()
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS posts (
-    id SERIAL PRIMARY KEY,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    type TEXT CHECK (type IN ('article','tuto')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )""")
-    conn.commit(); cur.close(); conn.close()
+    """Initialisation de la table au démarrage."""
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS posts (
+                id SERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                type TEXT CHECK (type IN ('article','tuto')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("Base de données initialisée avec succès.")
+    except Exception as e:
+        print(f"Erreur d'initialisation: {e}")
+
+init_db()
+
+@app.get("/api/ping") 
+def ping():
+    return jsonify({"status": "ok", "message": "Backend Flask est en ligne"}), 200
 
 @app.get("/posts")
 def list_posts():
-    t = request.args.get("type")
+    post_type = request.args.get("type")
     limit = request.args.get("limit")
-    conn = get_db(); cur = conn.cursor()
+    
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
 
-
-    q = "SELECT id,title,created_at FROM posts"
+    query = "SELECT id, title, type, created_at FROM posts"
     params = []
 
-
-    if t:
-        q += " WHERE type=%s"; params.append(t)
-    q += " ORDER BY created_at DESC"
+    if post_type:
+        query += " WHERE type=%s"
+        params.append(post_type)
+    
+    query += " ORDER BY created_at DESC"
+    
     if limit:
-        q += " LIMIT %s"; params.append(limit)  
+        query += " LIMIT %s"
+        params.append(limit)
 
-    cur.execute(q, params)
+    cur.execute(query, params)
     rows = cur.fetchall()
-    cur.close(); conn.close()
+    cur.close()
+    conn.close()
 
-    return jsonify([
-        {"id":r[0],"title":r[1],"created_at":r[2]} for r in rows
-    ])
-
-
-@app.get("/posts/<int:id>")
-def get_post(id):
-    conn = get_db(); cur = conn.cursor()
-    cur.execute("SELECT * FROM posts WHERE id=%s", (id,))
-    r = cur.fetchone()
-    cur.close(); conn.close()
-
-
-    if not r: return {"error":"not found"},404
-    return {"id":r[0],"title":r[1],"content":r[2],"type":r[3]}
+    return jsonify(rows)
 
 @app.post("/posts")
 def create_post():
-    d = request.json
-    conn = get_db(); cur = conn.cursor()
-    cur.execute(
-    "INSERT INTO posts(title,content,type) VALUES(%s,%s,%s)",
-    (d["title"], d["content"], d["type"])
-    )
-    conn.commit(); cur.close(); conn.close()
-    return {"status":"ok"},201
+    data = request.json
+    if not data or not all(k in data for k in ("title", "content", "type")):
+        return jsonify({"error": "Données manquantes"}), 400
 
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute(
+        "INSERT INTO posts (title, content, type) VALUES (%s, %s, %s) RETURNING id, created_at",
+        (data["title"], data["content"], data["type"])
+    )
+    new_post = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return jsonify({"status": "created", "id": new_post['id']}), 201
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)
-
-

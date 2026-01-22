@@ -1,18 +1,16 @@
 // const API_URL = "http://api.blog.localhost";
-const API = "/api";
+// const API = "/api";
+// const API = "/api/posts"; // On pointe directement vers la route Flask
 
-// export async function pingBackend() {
-//   const response = await fetch(`${API_URL}/ping`);
-//   return response.json();
-// }
+const API = "/api/posts";
 
 export const api = {
-  list: (type?: string, limit?: number) =>
-    fetch(
-      `${API}?${type ? `type=${type}&` : ""}${limit ? `limit=${limit}` : ""}`,
-    ).then((r) => r.json()),
-
-  get: (id: number) => fetch(`${API}/${id}`).then((r) => r.json()),
+  list: (type?: string, limit?: number) => {
+    const url = new URL(window.location.origin + API);
+    if (type) url.searchParams.append("type", type);
+    if (limit) url.searchParams.append("limit", limit.toString());
+    return fetch(url).then((r) => r.json());
+  },
 
   create: (data: any) =>
     fetch(API, {
