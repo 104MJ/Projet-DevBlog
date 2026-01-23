@@ -23,4 +23,12 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }),
+
+  get: async (id: string) => {
+    const response = await fetch(`${API}/${id}`);
+    if (!response.ok) {
+      return { error: "Non trouvé" };
+    }
+    return response.json();
+  },
 };

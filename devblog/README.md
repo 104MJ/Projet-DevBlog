@@ -2,24 +2,33 @@
 
 > **⚠️ MEMBRES DU GROUPE :**
 >
-> - **NOM Prénom** koagne Ngankam Danielle Jamila , Role: Dev
-> - **NOM Prénom** MAPENZI IGULU Jacqueline, Role: Infra
-> - **NOM Prénom** Aya Sghaier, Role: Dev
+> - **NOM Prénom** koagne Ngankam Danielle Jamila , Role:Dev
+> - **NOM Prénom** MAPENZI IGULU Jacqueline, Role:Infra
+> - **NOM Prénom** Aya Sghaier, Role:Dev
 
 ---
 
 ## 1. Présentation du Projet
 
-_Ce projet est une stack permettant de gérer un blog de développement "DevBlog" où les visiteurs peuvent lire des articles et voir des tutos de dev. L’application combine un frontend web, une API backend, une base de données pour stocker le contenue et un proxy inverse pour router les requêtes._
+_DevBlog est une plateforme web moderne dédiée au partage de connaissances et de tutoriels autour du développement informatique. Le projet repose sur une architecture complète : un frontend réactif (Vite/TypeScript), une API backend (Flask/Python), une base de données PostgreSQL pour la persistance, et un reverse proxy Caddy pour la gestion centralisée des accès. L’ensemble est orchestré via Docker, ce qui garantit portabilité, isolation et simplicité de déploiement._
 
 **Fonctionnalités principales :**
 
-- Publication de contenu de développement
-- Recherche et filtre
+- Création et publication d’articles de blog techniques
+- Ajout et partage de tutoriels vidéo (YouTube)
+- Consultation rapide des derniers articles et tutos
+- Interface utilisateur moderne et responsive
+- Administration de la base via Adminer
+- Accès sécurisé et centralisé via un reverse proxy (Caddy)
+- Déploiement local ou distant facilité grâce à Docker et Cloudflare Tunnel
 
 **Lien accessible (si tunnel actif) :** [https://votre-url-random.trycloudflare.com](https://votre-url-random.trycloudflare.com)
 
 **Screenshot de l'application déployée** : ![](screenshot.jpg)
+[![Aperçu Application](./images/app1.png)]
+[![Aperçu Application](./images/app2.png)]
+[![Aperçu Application](./images/app3.png)]
+[![Aperçu Application](./images/app4.png)]
 
 ## 2. Architecture Technique
 
@@ -38,12 +47,12 @@ _(Note aux étudiants : Pour que l'image ci-dessus s'affiche :_
 
 ### Description des services
 
-| Service | Image Docker | Rôle | Port Interne |
-| :--------- | :------------- | :---------------------- | :----------- |
-| **Proxy** | `caddy:latest` | Reverse Proxy & Routing | 80 |
-| **App** | `wordpress` | CMS | 80 |
-| **DB** | `mysql:5.7` | Base de données | 3306 |
-| **Tunnel** | `cloudflared` | Exposition Internet | N/A |
+| Service    | Image Docker         | Rôle                    | Port Interne |
+| :--------- | :------------------- | :---------------------- | :----------- |
+| **Proxy**  | `caddy:2.10`         | Reverse Proxy & Routing | 80           |
+| **App**    | `devblog  `          | CMS                     | 80           |
+| **DB**     | `postgres:15-alpine` | Base de données.        | 5432         |
+| **Tunnel** | `cloudflared`        | Exposition Internet     | N/A          |
 
 ## 3. Guide d'installation
 
@@ -52,21 +61,36 @@ Pour lancer le projet localement :
 1. Cloner le dépôt :
 
 ```bash
-git clone [https://github.com/votre-user/votre-repo.git](https://github.com/votre-user/votre-repo.git)
-cd votre-repo
+git clone [https://github.com/104MJ/Projet-DevBlog](https://github.com/104MJ/Projet-DevBlog)
+cd Projet-DevBlog/
 ```
 
 2. Lancer la stack :
 
 ```bash
-docker compose up -d
+task build
+task up
+cd infra (pour obtenir le lien cloudflared )
+docker compose logs cloudflared
 ```
 
+**Screenshot de terminal**
+[![Aperçu terminal](./images/terminal1.png)]
+[![Aperçu terminal](./images/terminal2.png)]
+[![Aperçu terminal](./images/terminal3.png)]
+
 3. Accéder aux services :
-- Web : `http://localhost`
-- Admin : `http://localhost/adminer` (exemple)
+
+- Web : `http://frontend.localhost`
+- Admin : `http://localhost:28080`
+
+**Screenshot de terminal**
+[![Aperçu web](./images/frontendlocal.png)]
+[![Aperçu adminer](./images/adminer1.png)]
+[![Aperçu adminer](./images/adminer2.png)]
 
 4. Obtenir l'URL publique :
+
 ```bash
 docker compose logs -f tunnel
 ```
@@ -81,11 +105,17 @@ _Expliquez rapidement comment vous avez travaillé (Pair programming, répartiti
 
 _Soyez honnêtes, c'est valorisé !_
 
-- **Outils utilisés :** (Ex: ChatGPT 4, GitHub Copilot)
+- **Outils utilisés :** Gemini , Chatgpt, Copilot
 - **Usage :**
-- _Génération de code :_ (Ex: "Nous avons utilisé Copilot pour générer le boilerplate du Docker Compose")
-- _Débuggage :_ (Ex: "ChatGPT nous a aidé à comprendre l'erreur 502 Bad Gateway")
-- _Documentation :_ (Ex: "Nous avons reformulé l'intro avec l'IA")
+- _Génération de code :_ "Nous avons utilisé Gemini pour générer le code frontend de notre application, afin d’optimiser le temps de développement. "
+- _Débuggage :_ "ChatGPT et Copilot nous ont aidé à comprendre les erreurs suivantes:
+  - conflits de ports Docker (port 80 déjà utilisé),
+  - mauvais routage des requêtes API entraînant des réponses HTML au lieu de JSON
+  - erreurs liées à l’ordre des directives dans le Caddyfile
+  - problèmes de communication entre conteneurs dus à une mauvaise configuration du réseau Docker
+  - limitations de Cloudflare Tunnel (rate limiting)
+  - absence de prise en compte des modifications due à l’oubli de reconstruction des images Docker."
+- _Documentation :_ ("Nous avons reformulé l'intro avec l'IA")
 - **Apprentissage :** (Ce que l'IA a fait vs ce que vous avez compris).
 
 ## 5. Difficultés rencontrées & Solutions

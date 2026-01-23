@@ -109,5 +109,26 @@ def create_post():
     
     return jsonify({"status": "created", "id": new_id}), 201
 
+
+@app.get("/posts/<int:post_id>")
+def get_post(post_id):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("SELECT id, title, content, created_at, 'article' as type FROM articles WHERE id = %s", (post_id,))
+    post = cur.fetchone()
+    
+    if not post:
+        cur.execute("SELECT id, title, content, video_url, created_at, 'tuto' as type FROM tutos WHERE id = %s", (post_id,))
+        post = cur.fetchone()
+        
+    cur.close()
+    conn.close()
+    
+    if post:
+        return jsonify(post)
+    
+    return jsonify({"error": "Post introuvable"}), 404
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)
