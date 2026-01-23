@@ -1,1 +1,4 @@
+# Ignorer les fichiers temporaires de dockge
+infra/data/dockge/dockge.db-shm
+infra/data/dockge/dockge.db-wal
 *.env
