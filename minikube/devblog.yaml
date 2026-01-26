@@ -45,6 +45,11 @@ spec:
               value: "postgres"
             - name: POSTGRES_PASSWORD
               value: "root"
+            - name: POSTGRES_HOST
+              value: "db-service"
+            - name: POSTGRES_PORT
+              value: "5432"
+
           ports:
             - containerPort: 5432
           volumeMounts:
@@ -133,6 +138,7 @@ spec:
           env:
             - name: VITE_API_URL
               value: "http://backend-service:8000"
+
           ports:
             - containerPort: 5173
 
