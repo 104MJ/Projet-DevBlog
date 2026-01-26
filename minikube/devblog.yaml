@@ -84,7 +84,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ayasghaier17/devblog-backend:latest
+          image: mjcqln/devblog-backend:latest
           env:
             - name: POSTGRES_DB
               value: "devblog"
@@ -129,7 +129,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ayasghaier17/devblog-frontend:latest
+          image: mjcqln/devblog-frontend:latest
           env:
             - name: VITE_API_URL
               value: "http://backend-service:8000"

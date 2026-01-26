@@ -8,5 +8,12 @@ export default defineConfig({
     hmr: {
       clientPort: 80,
     },
+    proxy: {
+      "/api": {
+        target: "http://backend-service:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
 });

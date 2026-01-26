@@ -1,12 +1,14 @@
 services:
   frontend:
     build: ./frontend
+    image: mjcqln/devblog-frontend:latest
     env_file:
       - ../.env
     networks:
       - public
   backend:
     build: ./backend
+    image: mjcqln/devblog-backend:latest
     env_file:
       - ../.env
     depends_on:

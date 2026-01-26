@@ -28,6 +28,13 @@ tasks:
       - task: run
         vars: { CMD: "pull" }
 
+  push:
+    desc: Build and Push images for all stacks
+    cmds:
+      - task: build
+      - task: run
+        vars: { CMD: "push" }
+
   logs:
     desc: View logs for all stacks
     cmds:
