@@ -3,7 +3,7 @@ services:
     image: cloudflare/cloudflared:2026.1.1
     # command: tunnel --url http://caddy
     # command: tunnel --url run //attention ca c'est pour la prod
-    command: tunnel --url http://caddy-public:80
+    command: tunnel --url http://caddy-public:80 --protocol http2
     container_name: cloudflared
     user: "1001:1001"
     environment:
