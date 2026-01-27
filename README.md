@@ -56,44 +56,74 @@ _(Note aux étudiants : Pour que l'image ci-dessus s'affiche :_
 
 ## 3. Guide d'installation
 
-Pour lancer le projet localement :
+Nous avons prévu deux façons de lancer le projet. La première avec **Docker Compose** et la version finale sur **Kubernetes**.
 
-1. Cloner le dépôt :
+### Option A : Lancer avec Docker Compose (Test)
 
-```bash
-git clone [https://github.com/104MJ/Projet-DevBlog](https://github.com/104MJ/Projet-DevBlog)
-cd Projet-DevBlog/
-```
+C'est la méthode classique. Il faut juste faire attention à bien lancer l'infra avant l'application.
 
-2. Lancer la stack :
+1. **Lancer la couche infra (Proxy & Tunnel) :**
+   ```bash
+   cd infra
+   docker compose up -d
+   ```
 
-```bash
-task build
-task up
-cd infra (pour obtenir le lien cloudflared )
-docker compose logs cloudflared
-```
+2. **Lancer l'application (Site & Base de données) :**
+   ```bash
+   cd ../devblog
+   docker compose up -d
+   ```
 
-**Screenshot de terminal**
-[![Aperçu terminal](./images/terminal1.png)]
-[![Aperçu terminal](./images/terminal2.png)]
-[![Aperçu terminal](./images/terminal3.png)]
+3. **Vérifier que tout tourne :**
+   Pour récupérer l'URL publique générée par le tunnel Cloudflare, on regarde les logs :
+   ```bash
+   cd ../infra
+   docker compose logs -f cloudflared
+   ```
 
-3. Accéder aux services :
+   **Aperçu du lancement dans le terminal :**
+   [![Aperçu terminal](./images/terminal1.png)]
+   [![Aperçu terminal](./images/terminal2.png)]
 
-- Web : `http://frontend.localhost`
-- Admin : `http://localhost:28080`
+   Une fois lancé, on peut accéder aux services en local :
+   - Site Web : `http://frontend.localhost`
+   - Adminer (BDD) : `http://localhost:28080`
 
-**Screenshot de terminal**
-[![Aperçu web](./images/frontendlocal.png)]
-[![Aperçu adminer](./images/adminer1.png)]
-[![Aperçu adminer](./images/adminer2.png)]
+   **Screenshots de l'interface :**
+   [![Aperçu web](./images/frontendlocal.png)]
+   [![Aperçu adminer](./images/adminer1.png)]
 
-4. Obtenir l'URL publique :
+---
 
-```bash
-docker compose logs -f tunnel
-```
+### Option B : Lancer avec Kubernetes (Prod)
+
+C'est la version aboutie du projet.
+
+1. **Démarrer le cluster :**
+   ```bash
+   minikube start --driver=docker
+   ```
+
+2. **Charger nos images :**
+   *(Étape nécessaire si vous n'avez pas internet pour pull depuis le Docker Hub)*
+   ```bash
+   minikube image load mjcqln/devblog-frontend:latest
+   minikube image load mjcqln/devblog-backend:latest
+   ```
+
+3. **Tout déployer :**
+   ```bash
+   kubectl apply -f minikube/
+   ```
+
+4. **Accéder au site :**
+   Comme pour Docker, on va chercher l'URL magique dans les logs du pod Cloudflare :
+   ```bash
+   kubectl logs -f deployment/cloudflared
+   ```
+   Il suffit de cliquer sur le lien en `.trycloudflare.com` qui s'affiche.
+
+---
 
 ## 4. Méthodologie & Transparence IA
 
