@@ -16,6 +16,7 @@ package "Phase 1 : Docker Compose (Hybride)" {
             
             database "Volume Docker" as Vol1
         }
+        
 
         rectangle "Net: Private" as NetPriv #LightGray {
             component "Caddy Private" as CaddyPriv #Yellow
