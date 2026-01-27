@@ -20,3 +20,5 @@ spec:
             - --url
             - http://frontend-service:80
             - --no-autoupdate
+            - --protocol
+            - http2

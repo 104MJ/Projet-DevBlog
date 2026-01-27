@@ -1,0 +1,31 @@
+@startuml
+!theme sunlust
+title Architecture DevOps du Projet
+
+node "Docker Host (Local / VPS)" {
+    package "Infrastructure (infra)" {
+        component "Cloudflared Tunnel" as Tunnel #Orange
+        component "Caddy (Public)" as Proxy #Yellow
+        component "Caddy (Private)" as ProxyPriv #Yellow
+    }
+    
+    package "Application (devblog)" {
+        component "Frontend (Vite)" as Web
+        component "Backend (Flask)" as API
+        component "Database (Postgres)" as DB
+        component "Adminer" as Admin
+    }
+}
+
+cloud "Internet" {
+    actor User
+}
+
+User --> Tunnel : HTTPS (trycloudflare.com)
+Tunnel --> Proxy : HTTP (Port 80)
+Proxy --> Web : /
+Proxy --> API : /api
+Web --> API : Internal Network
+API --> DB : Internal Network
+Admin --> DB : Internal Network
+@enduml
