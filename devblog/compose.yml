@@ -2,6 +2,7 @@ services:
   frontend:
     build: ./frontend
     image: mjcqln/devblog-frontend:latest
+    restart: unless-stopped
     env_file:
       - ../.env
     networks:
@@ -9,6 +10,7 @@ services:
   backend:
     build: ./backend
     image: mjcqln/devblog-backend:latest
+    restart: unless-stopped
     env_file:
       - ../.env
     depends_on:
@@ -17,6 +19,7 @@ services:
       - public
   db:
     image: postgres:15-alpine
+    restart: unless-stopped
     env_file:
       - ../.env
     volumes:

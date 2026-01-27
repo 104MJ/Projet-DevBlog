@@ -2,9 +2,9 @@
 
 > **⚠️ MEMBRES DU GROUPE :**
 >
-> - **NOM Prénom** koagne Ngankam Danielle Jamila , Role:Dev
-> - **NOM Prénom** MAPENZI IGULU Jacqueline, Role:Infra
-> - **NOM Prénom** Aya Sghaier, Role:Dev
+> - koagne Ngankam Danielle Jamila , Role:Dev
+> - MAPENZI IGULU Jacqueline, Role:Infra
+> - Aya Sghaier, Role:Dev
 
 ---
 
@@ -36,7 +36,7 @@ _DevBlog est une plateforme web moderne dédiée au partage de connaissances et 
 
 _Ce schéma est généré dynamiquement à partir du fichier `architecture.puml` présent dans ce dépôt._
 
-![Architecture du Projet](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/VOTRE_USERNAME_GITHUB/NOM_DU_REPO/main/architecture.puml)
+![Architecture du Projet](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/104MJ/Projet-DevBlog/master/architecture.puml)
 
 _(Note aux étudiants : Pour que l'image ci-dessus s'affiche :_
 
@@ -95,7 +95,7 @@ C'est la méthode classique. Il faut juste faire attention à bien lancer l'infr
 
 ---
 
-### Option B : Lancer avec Kubernetes (Prod)
+### Option B : Lancer avec Kubernetes
 
 C'est la version aboutie du projet.
 
@@ -117,7 +117,7 @@ C'est la version aboutie du projet.
    ```
 
 4. **Accéder au site :**
-   Comme pour Docker, on va chercher l'URL magique dans les logs du pod Cloudflare :
+   Comme pour Docker, on va chercher l'URL dans les logs du pod Cloudflare :
    ```bash
    kubectl logs -f deployment/cloudflared
    ```
@@ -129,7 +129,7 @@ C'est la version aboutie du projet.
 
 ### Organisation
 
-_Expliquez rapidement comment vous avez travaillé (Pair programming, répartition des tâches...)_
+Nous avons travaillé en Pair Programming, avec une répartition des tâches par couche (Front, Back, Infra) et des points de synchronisation réguliers.
 
 ### Utilisation de l'IA (Copilot, ChatGPT, Cursor...)
 
@@ -148,7 +148,15 @@ _Soyez honnêtes, c'est valorisé !_
 - _Documentation :_ ("Nous avons reformulé l'intro avec l'IA")
 - **Apprentissage :** (Ce que l'IA a fait vs ce que vous avez compris).
 
+
 ## 5. Difficultés rencontrées & Solutions
 
 - _Problème 1 :_ La base de données ne gardait pas les données.
 - _Solution :_ Ajout d'un volume nommé dans le docker-compose.
+
+- _Problème 2 :_ Le tunnel Cloudflare refusait de se connecter via Docker Compose (erreur "Context Canceled"), alors qu'il fonctionnait parfaitement sur Kubernetes.
+- _Solution :_ Nous avons compris que par défaut, Cloudflare utilise le protocole **QUIC (basé sur UDP)**, qui est souvent instable dans les environnements locaux/Docker. En forçant l'utilisation du protocole **HTTP/2 (basé sur TCP)** via l'option `--protocol http2` (comme c'était déjà le cas sur notre config Kubernetes), la connexion est devenue stable. Leçon apprise : toujours vérifier le protocole de transport quand un outil réseau échoue "silencieusement".
+
+- _Problème 3 :_ L'application chargeait indéfiniment ou affichait une erreur 502/404, car le Frontend essayait d'appeler l'API sur lui-même au lieu du Backend.
+- _Solution :_ Nous avons configuré le proxy de développement de **Vite** ("petit proxy"), via le fichier `vite.config.ts`. Cela permet d'intercepter toutes les requêtes commençant par `/api` et de les rediriger proprement vers le container Backend, résolvant ainsi les erreurs de communication Cross-Container.
+
