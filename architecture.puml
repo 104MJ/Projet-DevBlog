@@ -1,6 +1,6 @@
 @startuml
 !theme sunlust
-title Architecture du Projet (Double Vue Détaillée)
+title Architecture Devblog (Double Vue Détaillée)
 
 ' --- PHASE 1 : DOCKER COMPOSE AVANCÉ (Infra + App) ---
 package "Phase 1 : Docker Compose (Hybride)" {
@@ -16,7 +16,7 @@ package "Phase 1 : Docker Compose (Hybride)" {
             
             database "Volume Docker" as Vol1
         }
-        
+
 
         rectangle "Net: Private" as NetPriv #LightGray {
             component "Caddy Private" as CaddyPriv #Yellow
