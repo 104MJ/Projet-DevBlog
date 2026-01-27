@@ -161,7 +161,7 @@ spec:
             - containerPort: 5173
 
 
-# 4. Adminer (optionnel)
+# 4. Adminer
 ---
 apiVersion: v1
 kind: Service

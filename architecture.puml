@@ -1,31 +1,77 @@
 @startuml
 !theme sunlust
-title Architecture DevOps du Projet
+title Architecture du Projet (Double Vue Détaillée)
 
-node "Docker Host (Local / VPS)" {
-    package "Infrastructure (infra)" {
-        component "Cloudflared Tunnel" as Tunnel #Orange
-        component "Caddy (Public)" as Proxy #Yellow
-        component "Caddy (Private)" as ProxyPriv #Yellow
+' --- PHASE 1 : DOCKER COMPOSE AVANCÉ (Infra + App) ---
+package "Phase 1 : Docker Compose (Hybride)" {
+    node "Docker Host" {
+        component "Tunnel Cloudflare" as Tunnel1 #Orange
+        
+        rectangle "Net: Public" as NetPub #LightBlue {
+            component "Caddy Public" as CaddyPub #Yellow
+            component "Frontend (Vite)" as Front1
+            component "Backend (Flask)" as Back1
+            component "Postgres" as DB1
+            component "Adminer" as Admin1
+            
+            database "Volume Docker" as Vol1
+        }
+
+        rectangle "Net: Private" as NetPriv #LightGray {
+            component "Caddy Private" as CaddyPriv #Yellow
+            component "Dockge (Gestion)" as Dockge
+        }
     }
-    
-    package "Application (devblog)" {
-        component "Frontend (Vite)" as Web
-        component "Backend (Flask)" as API
-        component "Database (Postgres)" as DB
-        component "Adminer" as Admin
+}
+
+' --- PHASE 2 : KUBERNETES ---
+package "Phase 2 : Kubernetes (Cloud Native)" {
+    node "Cluster Minikube" {
+        component "Tunnel Cloudflare" as Tunnel2 #Orange
+        
+        rectangle "ClusterIP Services" {
+            component "Service Web" as SvcWeb
+            component "Service API" as SvcAPI
+        }
+
+        rectangle "Pods" {
+            component "Frontend Pod" as Front2
+            component "Backend Pod" as Back2
+            component "Postgres Pod" as DB2
+        }
+        
+        artifact "Secrets (K8s)" as Sec2 #Red
+        database "PVC (Volume)" as Vol2
     }
 }
 
 cloud "Internet" {
-    actor User
+    actor "Visiteur" as User
+    actor "Admin" as AdminUser
 }
 
-User --> Tunnel : HTTPS (trycloudflare.com)
-Tunnel --> Proxy : HTTP (Port 80)
-Proxy --> Web : /
-Proxy --> API : /api
-Web --> API : Internal Network
-API --> DB : Internal Network
-Admin --> DB : Internal Network
+' Flux Phase 1 - Public
+User -down-> Tunnel1 : HTTPS (trycloudflare.com)
+Tunnel1 -> CaddyPub : HTTP (80)
+CaddyPub -> Front1 : /
+CaddyPub -> Back1 : /api
+Back1 -> DB1
+Admin1 -> DB1
+DB1 --> Vol1 : Persistance (data)
+
+' Flux Phase 1 - Privé (Gestion)
+AdminUser ..> CaddyPriv : HTTPS (Local:443)
+CaddyPriv -> Dockge : /dockge
+
+' Flux Phase 2
+User -down-> Tunnel2 : HTTPS
+Tunnel2 -> SvcWeb
+SvcWeb -> Front2
+Front2 -> SvcAPI
+SvcAPI -> Back2
+Back2 -> DB2
+DB2 --> Vol2 : Persistance
+Back2 ..> Sec2 : Credentials
+DB2 ..> Sec2 : Credentials
+
 @enduml
