@@ -63,12 +63,14 @@ Nous avons prévu deux façons de lancer le projet. La première avec **Docker C
 C'est la méthode classique. Il faut juste faire attention à bien lancer l'infra avant l'application.
 
 1. **Lancer la couche infra (Proxy & Tunnel) :**
+
    ```bash
    cd infra
    docker compose up -d
    ```
 
 2. **Lancer l'application (Site & Base de données) :**
+
    ```bash
    cd ../devblog
    docker compose up -d
@@ -76,6 +78,7 @@ C'est la méthode classique. Il faut juste faire attention à bien lancer l'infr
 
 3. **Vérifier que tout tourne :**
    Pour récupérer l'URL publique générée par le tunnel Cloudflare, on regarde les logs :
+
    ```bash
    cd ../infra
    docker compose logs -f cloudflared
@@ -84,6 +87,7 @@ C'est la méthode classique. Il faut juste faire attention à bien lancer l'infr
    **Aperçu du lancement dans le terminal :**
    [![Aperçu terminal](./images/terminal1.png)]
    [![Aperçu terminal](./images/terminal2.png)]
+   [![Aperçu terminal](./images/terminal3.png)]
 
    Une fois lancé, on peut accéder aux services en local :
    - Site Web : `http://frontend.localhost`
@@ -100,18 +104,21 @@ C'est la méthode classique. Il faut juste faire attention à bien lancer l'infr
 C'est la version aboutie du projet.
 
 1. **Démarrer le cluster :**
+
    ```bash
    minikube start --driver=docker
    ```
 
 2. **Charger nos images :**
-   *(Étape nécessaire si vous n'avez pas internet pour pull depuis le Docker Hub)*
+   _(Étape nécessaire si vous n'avez pas internet pour pull depuis le Docker Hub)_
+
    ```bash
    minikube image load mjcqln/devblog-frontend:latest
    minikube image load mjcqln/devblog-backend:latest
    ```
 
 3. **Tout déployer :**
+
    ```bash
    kubectl apply -f minikube/
    ```
@@ -147,7 +154,7 @@ _Soyez honnêtes, c'est valorisé !_
   - absence de prise en compte des modifications due à l’oubli de reconstruction des images Docker."
 - _Documentation :_ ("Nous avons reformulé l'intro avec l'IA")
 - **Apprentissage :** (Ce que l'IA a fait vs ce que vous avez compris).
-
+- L’intelligence artificielle nous a grandement aidés à surmonter les difficultés techniques rencontrées lors de ce projet, notamment avec Docker, Kubernetes (Minikube) et la mise en place d’un tunnel sécurisé. À chaque étape, l’IA nous a permis d’identifier rapidement les erreurs de configuration, de comprendre les messages d’erreur complexes et de trouver des solutions adaptées, que ce soit pour le déploiement des conteneurs, la gestion des services sur Minikube ou la configuration du tunnel Cloudflare. Grâce à son assistance, nous avons appris à diagnostiquer et corriger les problèmes liés au réseau, à l’exposition des ports, à la persistance des données et à la communication entre les différents composants de l’infrastructure. Cette expérience nous a permis de progresser dans la maîtrise de Docker, Kubernetes et des tunnels réseau, tout en développant notre capacité à résoudre efficacement les erreurs techniques.
 
 ## 5. Difficultés rencontrées & Solutions
 
@@ -159,4 +166,3 @@ _Soyez honnêtes, c'est valorisé !_
 
 - _Problème 3 :_ L'application chargeait indéfiniment ou affichait une erreur 502/404, car le Frontend essayait d'appeler l'API sur lui-même au lieu du Backend.
 - _Solution :_ Nous avons configuré le proxy de développement de **Vite** ("petit proxy"), via le fichier `vite.config.ts`. Cela permet d'intercepter toutes les requêtes commençant par `/api` et de les rediriger proprement vers le container Backend, résolvant ainsi les erreurs de communication Cross-Container.
-
