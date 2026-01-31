@@ -2,9 +2,9 @@
 
 > **⚠️ MEMBRES DU GROUPE :**
 >
-> - koagne Ngankam Danielle Jamila , Role:Dev
+> - koagne Ngankam Danielle Jamila , Role:Dev backend
 > - MAPENZI IGULU Jacqueline, Role:Infra
-> - Aya Sghaier, Role:Dev
+> - Aya Sghaier, Role:Dev frontend
 
 ---
 
@@ -22,7 +22,9 @@ _DevBlog est une plateforme web moderne dédiée au partage de connaissances et 
 - Accès sécurisé et centralisé via un reverse proxy (Caddy)
 - Déploiement local ou distant facilité grâce à Docker et Cloudflare Tunnel
 
-**Lien accessible (si tunnel actif) :** [https://votre-url-random.trycloudflare.com](https://votre-url-random.trycloudflare.com)
+Lien accessible (si tunnel actif) :** [https://approximate-burton-segments-yesterday.trycloudflare.com/](https://approximate-burton-segments-yesterday.trycloudflare.com/) ceci est le dernier lien utilisé
+
+**Lien accessible :** *L'URL est générée dynamiquement au démarrage (voir logs du tunnel).*
 
 **Screenshot de l'application déployée** : ![](screenshot.jpg)
 [![Aperçu Application](./images/app1.png)]
@@ -38,12 +40,6 @@ _Ce schéma est généré dynamiquement à partir du fichier `architecture.puml`
 
 ![Architecture du Projet](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/104MJ/Projet-DevBlog/master/architecture.puml)
 
-_(Note aux étudiants : Pour que l'image ci-dessus s'affiche :_
-
-1. _Créez un fichier `architecture.puml` à la racine de votre repo._
-2. _Mettez votre code PlantUML dedans._
-3. _Remplacez `VOTRE_USERNAME_GITHUB` et `NOM_DU_REPO` dans l'URL ci-dessus par les vôtres._
-4. _Assurez-vous que votre repo est Public.)_
 
 ### Description des services
 
@@ -56,42 +52,49 @@ _(Note aux étudiants : Pour que l'image ci-dessus s'affiche :_
 
 ## 3. Guide d'installation
 
+### Pré-requis
+
+1. **Récupérer le projet :**
+   ```bash
+   git clone https://github.com/104MJ/Projet-DevBlog.git
+   cd Projet-DevBlog
+   ```
+
+2. **Installation de `task` (Optionnel mais recommandé) :**
+   On utilise [Task](https://taskfile.dev) pour ne pas avoir à taper des commandes à rallonge.
+   *Si vous ne voulez pas l'installer, pas de souci : on a mis les commandes classiques `docker compose` en note dans chaque étape.*
+
 Nous avons prévu deux façons de lancer le projet. La première avec **Docker Compose** et la version finale sur **Kubernetes**.
 
-### Option A : Lancer avec Docker Compose (Test)
+### Option A : Lancer avec Docker Compose 
 
-C'est la méthode classique. Il faut juste faire attention à bien lancer l'infra avant l'application.
-
-1. **Lancer la couche infra (Proxy & Tunnel) :**
-
+1. **Tout lancer d'un coup :**
    ```bash
-   cd infra
-   docker compose up -d
+   task up
+   ```
+   *Ça va lancer l'infra (Caddy, Tunnel) ET l'appli (Site, BDD) dans le bon ordre.*
+
+   > **Note :** Si vous n'avez pas `task` installé, vous pouvez toujours faire à l'ancienne :
+   > `docker compose -f infra/compose.yml up -d` puis `docker compose -f devblog/compose.yml up -d`
+
+2. **Mettre à jour le projet :**
+   Vu qu'on a mis en place un **CI/CD**, les images sont construites automatiquement sur GitHub. Pour récupérer la dernière version sans rien casser :
+   ```bash
+   task pull
+   task up
    ```
 
-2. **Lancer l'application (Site & Base de données) :**
-
+3. **Tout arrêter proprement :**
    ```bash
-   cd ../devblog
-   docker compose up -d
+   task down
    ```
 
-3. **Vérifier que tout tourne :**
-   Pour récupérer l'URL publique générée par le tunnel Cloudflare, on regarde les logs :
-
+4. **Accéder au site :**
+   Regardez les logs du tunnel pour choper l'URL publique :
    ```bash
-   cd ../infra
-   docker compose logs -f cloudflared
+   docker compose -f infra/compose.yml logs -f cloudflared
    ```
-
-   **Aperçu du lancement dans le terminal :**
-   [![Aperçu terminal](./images/terminal1.png)]
-   [![Aperçu terminal](./images/terminal2.png)]
-   [![Aperçu terminal](./images/terminal3.png)]
-
-   Une fois lancé, on peut accéder aux services en local :
-   - Site Web : `http://frontend.localhost`
-   - Adminer (BDD) : `http://localhost:28080`
+   Sinon en local : [http://frontend.localhost](http://frontend.localhost) et [http://localhost:28080](http://localhost:28080) (Adminer).
 
    **Screenshots de l'interface :**
    [![Aperçu web](./images/frontendlocal.png)]
@@ -110,12 +113,7 @@ C'est la version aboutie du projet.
    ```
 
 2. **Charger nos images :**
-   _(Étape nécessaire si vous n'avez pas internet pour pull depuis le Docker Hub)_
-
-   ```bash
-   minikube image load mjcqln/devblog-frontend:latest
-   minikube image load mjcqln/devblog-backend:latest
-   ```
+   *Plus besoin de le faire à la main !* Grâce au CI/CD, Minikube va télécharger tout seul les images `mjcqln/devblog-backend` et `frontend` depuis le Docker Hub.
 
 3. **Tout déployer :**
 
@@ -140,8 +138,6 @@ Nous avons travaillé en Pair Programming, avec une répartition des tâches par
 
 ### Utilisation de l'IA (Copilot, ChatGPT, Cursor...)
 
-_Soyez honnêtes, c'est valorisé !_
-
 - **Outils utilisés :** Gemini , Chatgpt, Copilot
 - **Usage :**
 - _Génération de code :_ "Nous avons utilisé Gemini pour générer le code frontend de notre application, afin d’optimiser le temps de développement. "
@@ -153,8 +149,14 @@ _Soyez honnêtes, c'est valorisé !_
   - limitations de Cloudflare Tunnel (rate limiting)
   - absence de prise en compte des modifications due à l’oubli de reconstruction des images Docker."
 - _Documentation :_ ("Nous avons reformulé l'intro avec l'IA")
+
 - **Apprentissage :** (Ce que l'IA a fait vs ce que vous avez compris).
-- L’intelligence artificielle nous a grandement aidés à surmonter les difficultés techniques rencontrées lors de ce projet, notamment avec Docker, Kubernetes (Minikube) et la mise en place d’un tunnel sécurisé. À chaque étape, l’IA nous a permis d’identifier rapidement les erreurs de configuration, de comprendre les messages d’erreur complexes et de trouver des solutions adaptées, que ce soit pour le déploiement des conteneurs, la gestion des services sur Minikube ou la configuration du tunnel Cloudflare. Grâce à son assistance, nous avons appris à diagnostiquer et corriger les problèmes liés au réseau, à l’exposition des ports, à la persistance des données et à la communication entre les différents composants de l’infrastructure. Cette expérience nous a permis de progresser dans la maîtrise de Docker, Kubernetes et des tunnels réseau, tout en développant notre capacité à résoudre efficacement les erreurs techniques.
+  - * 1 (Réseau)* : Quand le Frontend n'arrivait pas à joindre l'API, Gemini nous a expliqué que `localhost` ne fonctionnait pas **dans** un conteneur. On a ainsi compris qu'il fallait utiliser le nom du service Docker (DNS interne) pour qu'ils communiquent.
+
+  - * 2 (Protocoles)* : Pour le tunnel Cloudflare instable, c'est l'IA qui nous a suggéré de forcer le HTTP2. Cela nous a appris que le protocole par défaut (QUIC/UDP) pouvait bloquer en local.
+
+  - * 3 (Cycle de vie)* : Au début, on changeait le code mais rien ne bougeait sur le site. L'IA nous a rappelé que le conteneur tournait toujours sur l'ancienne image tant qu'on ne faisait pas un `docker build`. Ça nous a forcé à être rigoureux sur les versions (ce qui nous a motivées à mettre en place le CI/CD !).
+  => Bref, elle nous a surtout servi à comprendre l'architecture "sous le capot" et à gagner du temps avec le code de l'application.
 
 ## 5. Difficultés rencontrées & Solutions
 
